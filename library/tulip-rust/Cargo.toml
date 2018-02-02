@@ -1,0 +1,10 @@
+[package]
+name = "tulip"
+version = "0.1.0"
+authors = ["Romain Giot <romain.giot@u-bordeaux.fr>"]
+crate-type = ["staticlib"]
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.26.3"
