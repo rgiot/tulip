@@ -7,13 +7,20 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use std::slice;
 
 struct Graph {
-    g: tulip_graph_t
+    g: tulip_graph_t,
+    no_nodes: [Node; 0],
+    no_edges: [Edge; 0],
+
 }
 
 
 
 trait GraphElement {
     fn get_id(&self) -> u32;
+
+    fn is_valid(&self) -> bool {
+        self.get_id() != <u32>::max_value()
+    }
 }
 
 struct Node {
@@ -31,6 +38,17 @@ impl GraphElement for Node {
     }
 }
 
+impl Node {
+
+    fn fake() -> Node {
+        Node{idx: <u32>::max_value()}
+    }
+
+    fn from(idx:u32) -> Node {
+        Node{idx: idx}
+    }
+}
+
 impl GraphElement for Edge {
     fn get_id(&self) -> u32 {
         return self.idx
@@ -45,7 +63,7 @@ impl Graph {
 
         match id.is_null() {
             true => Err("Unable to create graph"),
-            false => Ok(Graph{ g:id })
+            false => Ok(Graph{ g:id, no_nodes:[], no_edges:[] })
         }
     }
 
@@ -69,7 +87,7 @@ impl Graph {
 
     // An option is returned to managed sempty slice.
     // Need to do in another way...
-    pub fn nodes(&self) -> Option<&[Node]>{
+    pub fn nodes(&self) -> &[Node]{
         let mut addr:*const u32= 0 as *const u32;
         let mut size:u32 = 0;
 
@@ -81,10 +99,10 @@ impl Graph {
         }
 
         if !addr.is_null()  && size > 0 {
-            Some(unsafe{slice::from_raw_parts(addr as *const Node, size as usize)})
+            unsafe{slice::from_raw_parts(addr as *const Node, size as usize)}
         }
         else {
-            None
+            &self.no_nodes
         }
     }
 }
@@ -120,14 +138,22 @@ mod tests {
         let nb_nodes = g.number_of_nodes();
         assert_eq!(nb_nodes, 2);
 
-        let nodes = g.nodes();
-        assert!(nodes.is_some());
 
-        let nodes2 = nodes.unwrap();
-        let s = nodes.unwrap().len();
+        let nodes2 = g.nodes();
+        let s = nodes2.len();
         assert_eq!(s, 2);
 
         assert_eq!(nodes2[0].get_id(), 0);
         assert_eq!(nodes2[1].get_id(), 1);
+
+        for node in nodes2 {
+            assert!(node.is_valid());
+        }
+
+        let n:Node = Node::fake();
+        assert!(!n.is_valid());
+
+        let n:Node = Node::from(50);
+        assert!(n.is_valid());
     }
 }
