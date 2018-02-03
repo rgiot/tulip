@@ -4,10 +4,16 @@
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+use std::slice;
 
-    use std::ptr;
 struct Graph {
     g: tulip_graph_t
+}
+
+
+
+trait GraphElement {
+    fn get_id(&self) -> u32;
 }
 
 struct Node {
@@ -16,6 +22,19 @@ struct Node {
 
 struct Edge {
     idx: u32
+}
+
+
+impl GraphElement for Node {
+    fn get_id(&self) -> u32 {
+        return self.idx
+    }
+}
+
+impl GraphElement for Edge {
+    fn get_id(&self) -> u32 {
+        return self.idx
+    }
 }
 
 impl Graph {
@@ -46,6 +65,27 @@ impl Graph {
 
     pub fn number_of_nodes(&self) -> u32 {
         unsafe{tulip_number_of_nodes(self.g)}
+    }
+
+    // An option is returned to managed sempty slice.
+    // Need to do in another way...
+    pub fn nodes(&self) -> Option<&[Node]>{
+        let mut addr:*const u32= 0 as *const u32;
+        let mut size:u32 = 0;
+
+        let paddr = &mut addr as *mut *const u32;
+        let psize = &mut size as *mut u32;
+
+        unsafe{
+            tulip_nodes(self.g, paddr, psize);
+        }
+
+        if !addr.is_null()  && size > 0 {
+            Some(unsafe{slice::from_raw_parts(addr as *const Node, size as usize)})
+        }
+        else {
+            None
+        }
     }
 }
 
@@ -79,5 +119,15 @@ mod tests {
 
         let nb_nodes = g.number_of_nodes();
         assert_eq!(nb_nodes, 2);
+
+        let nodes = g.nodes();
+        assert!(nodes.is_some());
+
+        let nodes2 = nodes.unwrap();
+        let s = nodes.unwrap().len();
+        assert_eq!(s, 2);
+
+        assert_eq!(nodes2[0].get_id(), 0);
+        assert_eq!(nodes2[1].get_id(), 1);
     }
 }

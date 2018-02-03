@@ -5,6 +5,7 @@ authors = ["Romain Giot <romain.giot@u-bordeaux.fr>"]
 crate-type = ["staticlib"]
 
 [dependencies]
+libc = "*"
 
 [build-dependencies]
 bindgen = "0.26.3"

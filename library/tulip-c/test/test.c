@@ -23,7 +23,14 @@ int main(int argc, char *argv[])
 	int nb_nodes = tulip_number_of_nodes(g);
 	int nb_edges = tulip_number_of_edges(g);
 
-	printf("Nb nodes: %d, nb edges: %d", nb_nodes, nb_edges);
+	printf("Nb nodes: %d, nb edges: %d\n", nb_nodes, nb_edges);
 
+	tulip_nodes_t nodes;
+	tulip_nodes(g, &nodes, &nb_nodes);
+	printf("Nb nodes: %d\n", nb_nodes);
+
+	for(int i=0; i<5 ; ++i) {
+		printf("id: %u\n",  nodes[i]);
+	}
 	return 0;
 }
