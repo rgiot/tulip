@@ -14,6 +14,7 @@ ADD_CUSTOM_TARGET(RustDeps ALL
 
 
 
+SET(ENV{TULIPC_LIB_DIR} "/home/rgiot/build/tulip-rust/library/tulip-c/src/")
 
 ExternalProject_Add(
   tulip-rust
@@ -23,7 +24,8 @@ ExternalProject_Add(
     PATH=<INSTALL_DIR>
     DOWNLOAD_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND cargo build COMMAND cargo build --release
+    BUILD_COMMAND cargo build
+    COMMAND cargo build --release
     BINARY_DIR "${CMAKE_SOURCE_DIR}/library/tulip-rust"
     INSTALL_COMMAND ""
     LOG_BUILD ON

@@ -6,6 +6,9 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 use std::slice;
 
+
+// TODO Choose if node's life depend on grpah's life
+//      or if we clone them
 struct Graph {
     g: tulip_graph_t,
     no_nodes: [Node; 0],
@@ -13,29 +16,36 @@ struct Graph {
 
 }
 
-
-
 trait GraphElement {
     fn get_id(&self) -> u32;
+    fn is_element(&self, g:&Graph) -> bool;
 
     fn is_valid(&self) -> bool {
         self.get_id() != <u32>::max_value()
     }
+
 }
 
+#[derive(Clone)]
 struct Node {
     idx: u32
 }
 
+#[derive(Clone)]
 struct Edge {
     idx: u32
 }
 
-
 impl GraphElement for Node {
     fn get_id(&self) -> u32 {
-        return self.idx
+        self.idx
     }
+
+    fn is_element(&self, g:&Graph) -> bool {
+        g.is_node_element(self.clone())
+    }
+
+
 }
 
 impl Node {
@@ -53,6 +63,13 @@ impl GraphElement for Edge {
     fn get_id(&self) -> u32 {
         return self.idx
     }
+
+
+    fn is_element(&self, g:&Graph) -> bool {
+        g.is_edge_element(self.clone())
+    }
+
+
 }
 
 impl Graph {
@@ -81,6 +98,22 @@ impl Graph {
         }
     }
 
+    // Del node in all subgraphs
+    pub fn del_node(&self, n:Node) -> Result<bool, String> {
+        match n.clone().is_element(self) {
+            true => {unsafe{tulip_del_node(self.g, n.get_id(), 1)}; Ok(true)},
+            false => Err(String::from("Node XX is not in graph")),
+        }
+    }
+
+    pub fn is_node_element(&self, n: Node) -> bool {
+        unsafe{tulip_is_node_element(self.g, n.get_id()) != 0}
+    }
+
+    pub fn is_edge_element(&self, e: Edge) -> bool {
+        unsafe{tulip_is_edge_element(self.g, e.get_id()) != 0}
+    }
+
     pub fn number_of_nodes(&self) -> u32 {
         unsafe{tulip_number_of_nodes(self.g)}
     }
@@ -104,6 +137,10 @@ impl Graph {
         else {
             &self.no_nodes
         }
+    }
+
+    pub fn deg(&self, n: Node) -> u32 {
+        unsafe{tulip_deg(self.g, n.get_id())}
     }
 }
 
@@ -133,7 +170,11 @@ mod tests {
         let mut g = Graph::new().expect("Unable to create graph");
         let n1 = g.add_node();
         let n2 = g.add_node();
-        let e = g.add_edge(n1, n2);
+        let e = g.add_edge(n1.clone(), n2.clone());
+
+
+        assert!(n1.clone().is_element(&g));
+        assert!(n2.clone().is_element(&g));
 
         let nb_nodes = g.number_of_nodes();
         assert_eq!(nb_nodes, 2);
@@ -152,8 +193,40 @@ mod tests {
 
         let n:Node = Node::fake();
         assert!(!n.is_valid());
+        assert!(!n.is_element(&g));
 
         let n:Node = Node::from(50);
         assert!(n.is_valid());
+    }
+
+    #[test]
+    fn del() {
+        let mut g = Graph::new().expect("Unable to create graph");
+        let n1 = g.add_node();
+        let n2 = g.add_node();
+        let e = g.add_edge(n1.clone(), n2.clone());
+
+
+        assert!(n1.clone().is_element(&g));
+        assert!(n2.clone().is_element(&g));
+
+        g.del_node(n1.clone());
+        assert!(!n1.is_element(&g));
+    }
+
+    #[test]
+    fn deg() {
+        let mut g = Graph::new().expect("Unable to create graph");
+        let n1 = g.add_node();
+        let n2 = g.add_node();
+        let n3 = g.add_node();
+        let e = g.add_edge(n1.clone(), n2.clone());
+
+        let nb_nodes = g.number_of_nodes();
+        assert_eq!(nb_nodes, 3);
+        assert_eq!(g.deg(n1), 1);
+        assert_eq!(g.deg(n3), 0);
+
+
     }
 }

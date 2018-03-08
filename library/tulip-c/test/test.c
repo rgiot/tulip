@@ -32,5 +32,15 @@ int main(int argc, char *argv[])
 	for(int i=0; i<5 ; ++i) {
 		printf("id: %u\n",  nodes[i]);
 	}
+
+	tulip_del_node(g, n1, 1);
+	tulip_nodes(g, &nodes, &nb_nodes);
+	printf("Nb nodes: %d\n", nb_nodes);
+
+
+	printf("Nb edges: %d\n", tulip_number_of_edges(g));
+	tulip_del_edge(g, e4, 1);
+	printf("Nb edges: %d\n", tulip_number_of_edges(g));
+
 	return 0;
 }
