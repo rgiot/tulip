@@ -1,6 +1,7 @@
 #include "tulipc/tulip_graph.h"
 #include <tulip/Graph.h>
 
+
 tulip_graph_t tulip_new_graph() {
 	return tlp::newGraph();
 }
@@ -103,3 +104,47 @@ int tulip_is_edge_element(tulip_graph_t g, tulip_edge e) {
 
 
 
+
+
+
+#include <tulip/ColorProperty.h>
+
+tulip_color_property_t tulip_get_color_property(tulip_graph_t g, const char *prop) {
+	return reinterpret_cast<tlp::Graph *>(g)->getProperty<tlp::ColorProperty>(prop);
+}
+
+void tulip_colorproperty_set_node_value(tulip_color_property_t p, const tulip_node n, const struct color_t* const c ) {
+	return reinterpret_cast<tlp::ColorProperty *>(p)->setNodeValue(tlp::node(n), tlp::Color(c->r, c->g, c->b, c->a));
+}
+
+struct color_t  tulip_colorproperty_get_node_value(tulip_color_property_t p, tulip_node n) {
+	struct color_t c;
+
+	const auto & res = reinterpret_cast<tlp::ColorProperty *>(p)->getNodeValue(tlp::node(n));
+	c.r = res.r();
+	c.b = res.b();
+	c.g = res.g();
+	c.a = res.a();
+	return c;
+}
+
+
+
+
+
+
+#include <tulip/StringProperty.h>
+
+tulip_string_property_t tulip_get_string_property(tulip_graph_t g, const char *prop) {
+	return reinterpret_cast<tlp::Graph *>(g)->getProperty<tlp::StringProperty>(prop);
+}
+
+void tulip_stringproperty_set_node_value(tulip_string_property_t p, const tulip_node n, const char *s ) {
+	return reinterpret_cast<tlp::StringProperty *>(p)->setNodeValue(tlp::node(n), s);
+}
+
+// XXX No idea how to manage the live of the string
+const char * tulip_stringproperty_get_node_value(tulip_string_property_t p, tulip_node n) {
+	const auto & res = reinterpret_cast<tlp::StringProperty *>(p)->getNodeValue(tlp::node(n));
+	return res.c_str(); // XXX will it die now
+}

@@ -11,14 +11,45 @@ pub mod tlp {
     use std::slice;
 
 
-    // TODO Choose if node's life depend on grpah's life
-    //      or if we clone them
     pub struct Graph {
         g: ::tulip_graph_t,
-        no_nodes: [Node; 0],
-        no_edges: [Edge; 0],
-
+        no_nodes: [Node; 0], // manage the absence of nodes
+        no_edges: [Edge; 0], // manage the absence of edges
     }
+
+
+    pub type Color = ::color_t;
+
+    impl Color {
+        pub fn new(r:u8, g:u8, b:u8) -> Color {
+            Color{r,g,b,a:0}
+        }
+    }
+
+    pub struct ColorProperty {
+        p: ::tulip_color_property_t
+    }
+
+    pub struct StringProperty {
+        p: ::tulip_string_property_t
+    }
+
+
+    // TODO use trait
+    impl ColorProperty {
+        pub fn set_node_value(&mut self, n: &Node, val:Color) {
+            unsafe{::tulip_colorproperty_set_node_value(self.p, n.get_id(), (&val) as * const _)};
+        }
+    }
+
+    // TODO use trait
+    impl StringProperty {
+        pub fn set_node_value(&mut self, n:&Node, val:&str) {
+            use std::ffi::CString;
+            unsafe{::tulip_stringproperty_set_node_value(self.p, n.get_id(), CString::new(val).unwrap().as_ptr() )};
+        }
+    }
+
 
     pub trait GraphElement {
         fn get_id(&self) -> u32;
@@ -91,6 +122,14 @@ pub mod tlp {
         }
 
 
+        /// Save the graph on disc
+        /// TODO Manage error code
+        pub fn save(&self, fname:&str) {
+            use std::ffi::CString;
+            unsafe{::tulip_save_graph(self.g, CString::new(fname).unwrap().as_ptr())};
+        }
+
+
         /// Add a new node in the graph and return it
         pub fn add_node(&mut self) -> Node {
             let id = unsafe{::tulip_add_node(self.g)};
@@ -155,6 +194,28 @@ pub mod tlp {
         /// Return the degree of the graph
         pub fn deg(&self, n: &Node) -> u32 {
             unsafe{::tulip_deg(self.g, n.get_id())}
+        }
+
+
+        // TODO Use macros to generate all variants of each type
+        pub fn get_color_property(&self, name:&str) -> ColorProperty {
+            use std::os::raw::c_char;
+            use std::ffi::{CString, CStr};
+
+            ColorProperty {
+                p: unsafe{::tulip_get_color_property(self.g, CString::new(name).unwrap().as_ptr())}
+            }
+        }
+
+
+        // TODO Use macros to generate all variants of each type
+        pub fn get_string_property(&self, name:&str) -> StringProperty {
+            use std::os::raw::c_char;
+            use std::ffi::{CString, CStr};
+
+            StringProperty {
+                p: unsafe{::tulip_get_string_property(self.g, CString::new(name).unwrap().as_ptr())}
+            }
         }
     }
 
