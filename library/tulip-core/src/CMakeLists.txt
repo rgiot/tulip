@@ -120,7 +120,4 @@ ENDIF(LINUX)
 ENDIF(TULIP_ACTIVATE_PYTHON_WHEELS_TARGETS)
 
 
-# Create a static version for rust compiler
-ADD_LIBRARY(${LibTulipCoreName}Static STATIC ${tulip_LIB_SRCS} ../include/tulip/TulipRelease.h)
-TARGET_LINK_LIBRARIES(${LibTulipCoreName}Static ${GZStreamLibrary} ${YajlLibrary} ${QhullLibrary} ${CMAKE_DL_LIBS})
 
