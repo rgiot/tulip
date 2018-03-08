@@ -6,21 +6,21 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 
 
-mod tlp {
+pub mod tlp {
 
     use std::slice;
 
 
     // TODO Choose if node's life depend on grpah's life
     //      or if we clone them
-    struct Graph {
+    pub struct Graph {
         g: ::tulip_graph_t,
         no_nodes: [Node; 0],
         no_edges: [Edge; 0],
 
     }
 
-    trait GraphElement {
+    pub trait GraphElement {
         fn get_id(&self) -> u32;
         fn is_element(&self, g:&Graph) -> bool;
 
@@ -31,12 +31,12 @@ mod tlp {
     }
 
     #[derive(Clone)]
-    struct Node {
+    pub struct Node {
         idx: u32
     }
 
     #[derive(Clone)]
-    struct Edge {
+    pub struct Edge {
         idx: u32
     }
 
@@ -46,7 +46,7 @@ mod tlp {
         }
 
         fn is_element(&self, g:&Graph) -> bool {
-            g.is_node_element(self.clone())
+            g.is_node_element(self)
         }
 
 
@@ -70,13 +70,15 @@ mod tlp {
 
 
         fn is_element(&self, g:&Graph) -> bool {
-            g.is_edge_element(self.clone())
+            g.is_edge_element(self)
         }
 
 
     }
 
     impl Graph {
+
+        /// Create a new graph
         pub fn new() -> Result<Graph, &'static str> {
             let id = unsafe {
                 ::tulip_new_graph()
@@ -88,6 +90,8 @@ mod tlp {
             }
         }
 
+
+        /// Add a new node in the graph and return it
         pub fn add_node(&mut self) -> Node {
             let id = unsafe{::tulip_add_node(self.g)};
             Node {
@@ -95,35 +99,40 @@ mod tlp {
             }
         }
 
-        pub fn add_edge(&mut self, n1: Node , n2: Node) -> Edge {
+        /// Add a new edge
+        pub fn add_edge(&mut self, n1: &Node , n2: &Node) -> Edge {
             let id = unsafe{::tulip_add_edge(self.g, n1.idx, n2.idx)};
             Edge {
                 idx: id
             }
         }
 
-        // Del node in all subgraphs
-        pub fn del_node(&self, n:Node) -> Result<bool, String> {
-            match n.clone().is_element(self) {
+        /// Del node in all subgraphs
+        pub fn del_node(&self, n: &Node) -> Result<bool, String> {
+            match n.is_element(self) {
                 true => {unsafe{::tulip_del_node(self.g, n.get_id(), 1)}; Ok(true)},
                 false => Err(String::from("Node XX is not in graph")),
             }
         }
 
-        pub fn is_node_element(&self, n: Node) -> bool {
+        /// Verify if the node belongs to the  graph
+        pub fn is_node_element(&self, n: &Node) -> bool {
             unsafe{::tulip_is_node_element(self.g, n.get_id()) != 0}
         }
 
-        pub fn is_edge_element(&self, e: Edge) -> bool {
+        /// Verify if the edge belongs to the graph
+        pub fn is_edge_element(&self, e: &Edge) -> bool {
             unsafe{::tulip_is_edge_element(self.g, e.get_id()) != 0}
         }
 
+        /// Returns the number of nodes of the graph
         pub fn number_of_nodes(&self) -> u32 {
             unsafe{::tulip_number_of_nodes(self.g)}
         }
 
-        // An option is returned to managed sempty slice.
-        // Need to do in another way...
+        /// Return all the nodes of the graph
+        /// An option is returned to managed sempty slice.
+        /// Need to do in another way...
         pub fn nodes(&self) -> &[Node]{
             let mut addr:*const u32= 0 as *const u32;
             let mut size:u32 = 0;
@@ -143,7 +152,8 @@ mod tlp {
             }
         }
 
-        pub fn deg(&self, n: Node) -> u32 {
+        /// Return the degree of the graph
+        pub fn deg(&self, n: &Node) -> u32 {
             unsafe{::tulip_deg(self.g, n.get_id())}
         }
     }
@@ -174,11 +184,11 @@ mod tlp {
             let mut g = Graph::new().expect("Unable to create graph");
             let n1 = g.add_node();
             let n2 = g.add_node();
-            let e = g.add_edge(n1.clone(), n2.clone());
+            let e = g.add_edge(&n1, &n2);
 
 
-            assert!(n1.clone().is_element(&g));
-            assert!(n2.clone().is_element(&g));
+            assert!(n1.is_element(&g));
+            assert!(n2.is_element(&g));
 
             let nb_nodes = g.number_of_nodes();
             assert_eq!(nb_nodes, 2);
@@ -208,13 +218,13 @@ mod tlp {
             let mut g = Graph::new().expect("Unable to create graph");
             let n1 = g.add_node();
             let n2 = g.add_node();
-            let e = g.add_edge(n1.clone(), n2.clone());
+            let e = g.add_edge(&n1, &n2);
 
 
-            assert!(n1.clone().is_element(&g));
-            assert!(n2.clone().is_element(&g));
+            assert!(n1.is_element(&g));
+            assert!(n2.is_element(&g));
 
-            g.del_node(n1.clone());
+            g.del_node(&n1);
             assert!(!n1.is_element(&g));
         }
 
@@ -224,12 +234,12 @@ mod tlp {
             let n1 = g.add_node();
             let n2 = g.add_node();
             let n3 = g.add_node();
-            let e = g.add_edge(n1.clone(), n2.clone());
+            let e = g.add_edge(&n1, &n2);
 
             let nb_nodes = g.number_of_nodes();
             assert_eq!(nb_nodes, 3);
-            assert_eq!(g.deg(n1), 1);
-            assert_eq!(g.deg(n3), 0);
+            assert_eq!(g.deg(&n1), 1);
+            assert_eq!(g.deg(&n3), 0);
 
 
         }
