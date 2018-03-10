@@ -9,13 +9,13 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 pub mod tlp {
 
     use std::slice;
-
+    use std::ptr;
+    use std::os;
 
     /// Generate the get_property code for the specific type of data
     macro_rules! get_property {
         ($type:/*ty*/tt, $rustname:ident, $cname:tt/*ident*/) => (
             pub fn $rustname(&self, name:&str) -> $type {
-                use std::os::raw::c_char;
                 use std::ffi::CString;
 
                 let prop:$type;
@@ -282,9 +282,34 @@ pub mod tlp {
 
 
         // Algorithm stuff
-        pub fn apply_property_algorithm<Prop:Property>(& mut self, algo_name: &str, property: Prop) -> Result<(), &str> 
+        pub fn apply_property_algorithm(& mut self, algo_name: &str, property: DoubleProperty) -> Result<(), String>
         {
-            Err("Unable to apply algorithm")
+            use std::ffi::CString;
+            let c_algo_name = CString::new(algo_name).unwrap().as_ptr();
+
+            //TODO find a way to get the right code and not double each time
+            let res = unsafe{
+                ::tulip_apply_doubleproperty_algorithm(
+                    self.g,
+                    property.p,
+                    c_algo_name,
+                    0 as *mut os::raw::c_void)} != 0;
+
+            if res {
+                Ok(())
+            }
+            else {
+                use std::ffi::CStr;
+                Err(
+                    unsafe {
+                        String::from(CStr::from_ptr(::tulip_plugin_error_message())
+                                     .to_str()
+                                     .unwrap()
+                                    ).clone()
+                    }
+                )
+            }
+
         }
 
     }

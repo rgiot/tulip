@@ -169,3 +169,20 @@ const double  tulip_doubleproperty_get_node_value(tulip_double_property_t p, tul
 
 
 
+std::string error;
+
+
+// TODO templetize for all the cases
+char tulip_apply_doubleproperty_algorithm(tulip_graph_t g, tulip_double_property_t p, const char * const n, tulip_dataset_t const d) {
+	return reinterpret_cast<tlp::Graph *>(g)->applyPropertyAlgorithm(
+			n,
+			reinterpret_cast<tlp::DoubleProperty *>(p),
+			error,
+			reinterpret_cast<tlp::DataSet *>(d)
+			);
+}
+
+
+const char * tulip_plugin_error_message() {
+	return error.c_str();
+}

@@ -19,6 +19,9 @@ typedef void* tulip_color_property_t;
 typedef void* tulip_string_property_t;
 typedef void* tulip_double_property_t;
 
+
+typedef void * tulip_dataset_t;
+
 struct color_t {
 	 unsigned char r;
 	 unsigned char g;
@@ -71,5 +74,10 @@ EXTERNC tulip_double_property_t tulip_get_double_property(tulip_graph_t g, const
 EXTERNC void tulip_doubleproperty_set_node_value(tulip_double_property_t, const tulip_node n, const double);
 EXTERNC const double tulip_doubleproperty_get_node_value(tulip_double_property_t, const tulip_node n);
 
+
+// Call the algorihtm stuff and returns true if succeded. Error message can be obtained with tulip_plugin_error_message
+EXTERNC char tulip_apply_doubleproperty_algorithm(tulip_graph_t, tulip_double_property_t, const char * const, tulip_dataset_t const);
+
+EXTERNC const char * tulip_plugin_error_message();
 #undef EXTERNC
 #endif

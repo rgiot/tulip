@@ -35,7 +35,9 @@ fn test() {
 
     let mut metric = myGraph.get_double_property("degree");
 
-    myGraph.apply_property_algorithm("Degree", metric);
+    myGraph.apply_property_algorithm("Degree", metric).expect("Failure");
+    //assert!((&res).is_ok());
+
     // TODO add additional instructions of the demo
 
     myGraph.save("mygraph.tlp");
