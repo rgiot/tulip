@@ -35,6 +35,7 @@ pub mod tlp {
 
 
 
+
     pub struct Graph {
         g: ::tulip_graph_t,
         no_nodes: [Node; 0], // manage the absence of nodes
@@ -44,10 +45,23 @@ pub mod tlp {
 
     pub type Color = ::color_t;
 
+
     impl Color {
         pub fn new(r:u8, g:u8, b:u8) -> Color {
             Color{r,g,b,a:0}
         }
+    }
+
+    /// Each property must implement this trait
+    pub trait Property {
+        /// Repesents the type of data in tulip c library
+        type TulipType;
+
+        /// Represents the data manipulated
+        type Data;
+
+        /// Change the value of the required node
+        fn set_node_value(&mut self, n: &Node, val: Self::Data);
     }
 
     pub struct ColorProperty {
@@ -58,21 +72,41 @@ pub mod tlp {
         p: ::tulip_string_property_t
     }
 
+    pub struct DoubleProperty {
+        p: ::tulip_double_property_t
+    }
 
-    // TODO use trait
-    impl ColorProperty {
-        pub fn set_node_value(&mut self, n: &Node, val:Color) {
+
+    impl Property for ColorProperty {
+        type TulipType = ::tulip_color_property_t;
+        type Data = Color;
+
+        fn set_node_value(&mut self, n: &Node, val: Self::Data) {
             unsafe{::tulip_colorproperty_set_node_value(self.p, n.get_id(), (&val) as * const _)};
         }
     }
 
-    // TODO use trait
-    impl StringProperty {
-        pub fn set_node_value(&mut self, n:&Node, val:&str) {
+    impl Property for StringProperty {
+        type TulipType = ::tulip_string_property_t;
+        type Data = String;
+
+        fn set_node_value(&mut self, n:&Node, val: Self::Data) {
             use std::ffi::CString;
             unsafe{::tulip_stringproperty_set_node_value(self.p, n.get_id(), CString::new(val).unwrap().as_ptr() )};
         }
     }
+
+    impl Property for DoubleProperty {
+        type TulipType = ::tulip_double_property_t;
+        type Data = f64;
+
+        fn set_node_value(&mut self, n:&Node, val: Self::Data) {
+            unsafe{::tulip_doubleproperty_set_node_value(self.p, n.get_id(), val)};
+        }
+    }
+
+
+
 
 
     pub trait GraphElement {
@@ -220,8 +254,19 @@ pub mod tlp {
             unsafe{::tulip_deg(self.g, n.get_id())}
         }
 
+        // Property stuff
+
         get_property!(ColorProperty, get_color_property, (::tulip_get_color_property));
         get_property!(StringProperty, get_string_property, (::tulip_get_string_property));
+        get_property!(DoubleProperty, get_double_property, (::tulip_get_double_property));
+
+
+
+        // Algorithm stuff
+        pub fn apply_property_algorithm<Prop:Property>(& mut self, algo_name: &str, property: Prop) -> Result<(), &str> 
+        {
+            Err("Unable to apply algorithm")
+        }
 
     }
 

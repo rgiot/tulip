@@ -27,12 +27,15 @@ fn test() {
     color.set_node_value(&e, Color::new(0, 255, 0));
 
     let mut label = myGraph.get_string_property("viewLabel");
-    label.set_node_value(&a, "A");
-    label.set_node_value(&b, "B");
-    label.set_node_value(&c, "C");
-    label.set_node_value(&d, "D");
-    label.set_node_value(&e, "E");
+    label.set_node_value(&a, String::from("A"));
+    label.set_node_value(&b, String::from("B"));
+    label.set_node_value(&c, String::from("C"));
+    label.set_node_value(&d, String::from("D"));
+    label.set_node_value(&e, String::from("E"));
 
+    let mut metric = myGraph.get_double_property("degree");
+
+    myGraph.apply_property_algorithm("Degree", metric);
     // TODO add additional instructions of the demo
 
     myGraph.save("mygraph.tlp");

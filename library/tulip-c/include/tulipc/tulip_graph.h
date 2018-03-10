@@ -17,6 +17,7 @@ typedef tulip_edge * tulip_edges_t;
 
 typedef void* tulip_color_property_t;
 typedef void* tulip_string_property_t;
+typedef void* tulip_double_property_t;
 
 struct color_t {
 	 unsigned char r;
@@ -57,13 +58,18 @@ EXTERNC int tulip_is_edge_element(tulip_graph_t, tulip_node);
 
 EXTERNC tulip_color_property_t tulip_get_color_property(tulip_graph_t g, const char *);
 EXTERNC void tulip_colorproperty_set_node_value(tulip_color_property_t, const tulip_node n, const struct color_t* const);
-EXTERNC struct color_t tulip_colorproperty_get_node_value(tulip_color_property_t, const tulip_node n);
+EXTERNC const struct color_t tulip_colorproperty_get_node_value(tulip_color_property_t, const tulip_node n);
 
 
 EXTERNC tulip_string_property_t tulip_get_string_property(tulip_graph_t g, const char *);
 EXTERNC void tulip_stringproperty_set_node_value(tulip_string_property_t, const tulip_node n, const char *);
 EXTERNC const char *tulip_stringproperty_get_node_value(tulip_string_property_t, const tulip_node n);
 
+
+
+EXTERNC tulip_double_property_t tulip_get_double_property(tulip_graph_t g, const char *);
+EXTERNC void tulip_doubleproperty_set_node_value(tulip_double_property_t, const tulip_node n, const double);
+EXTERNC const double tulip_doubleproperty_get_node_value(tulip_double_property_t, const tulip_node n);
 
 #undef EXTERNC
 #endif

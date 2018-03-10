@@ -117,7 +117,7 @@ void tulip_colorproperty_set_node_value(tulip_color_property_t p, const tulip_no
 	return reinterpret_cast<tlp::ColorProperty *>(p)->setNodeValue(tlp::node(n), tlp::Color(c->r, c->g, c->b, c->a));
 }
 
-struct color_t  tulip_colorproperty_get_node_value(tulip_color_property_t p, tulip_node n) {
+const struct color_t  tulip_colorproperty_get_node_value(tulip_color_property_t p, tulip_node n) {
 	struct color_t c;
 
 	const auto & res = reinterpret_cast<tlp::ColorProperty *>(p)->getNodeValue(tlp::node(n));
@@ -148,3 +148,24 @@ const char * tulip_stringproperty_get_node_value(tulip_string_property_t p, tuli
 	const auto & res = reinterpret_cast<tlp::StringProperty *>(p)->getNodeValue(tlp::node(n));
 	return res.c_str(); // XXX will it die now
 }
+
+
+
+
+
+#include <tulip/DoubleProperty.h>
+
+tulip_double_property_t tulip_get_double_property(tulip_graph_t g, const char *prop) {
+	return reinterpret_cast<tlp::Graph *>(g)->getProperty<tlp::ColorProperty>(prop);
+}
+
+void tulip_doubleproperty_set_node_value(tulip_double_property_t p, const tulip_node n, const double val) {
+	return reinterpret_cast<tlp::DoubleProperty *>(p)->setNodeValue(tlp::node(n), val);
+}
+
+const double  tulip_doubleproperty_get_node_value(tulip_double_property_t p, tulip_node n) {
+	return reinterpret_cast<tlp::DoubleProperty *>(p)->getNodeValue(tlp::node(n));
+}
+
+
+
