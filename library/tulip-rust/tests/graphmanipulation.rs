@@ -5,6 +5,9 @@ use tulip::tlp::*;
 #[test]
 fn test() {
 
+    init_lib();
+    init_tulip_software();
+
     let mut myGraph = Graph::new().expect("Unable to create the graph");
 
     let a = myGraph.add_node();

@@ -21,12 +21,14 @@ fn main() {
     let TULIP_LINK_SEARCH_PATH = [
         format!("{}{}", RUSTC_LINK_SEARCH_BUILD, "library/tulip-c/src/"),
         format!("{}{}", RUSTC_LINK_SEARCH_BUILD, "library/tulip-core/src/"),
+        format!("{}{}", RUSTC_LINK_SEARCH_BUILD, "library/tulip-gui/src/"),
         format!("{}{}", RUSTC_LINK_SEARCH_BUILD, LIBCPP_ROOT_DIR)
     ];
 
     let TULIP_LINK_LIB = [
         format!("{}{}{}", RUSTC_LINK_LIB, "c-tulip-core-", TULIP_VERSION),
         format!("{}{}{}", RUSTC_LINK_LIB, "tulip-core-", TULIP_VERSION),
+        format!("{}{}{}", RUSTC_LINK_LIB, "tulip-gui-", TULIP_VERSION),
         format!("{}{}", RUSTC_LINK_LIB, "stdc++")
     ];
 

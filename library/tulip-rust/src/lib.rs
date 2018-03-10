@@ -34,6 +34,17 @@ pub mod tlp {
 
 
 
+    pub fn init_lib() {
+        unsafe{::tulip_init_lib()};
+    }
+
+    pub fn load_plugins() {
+        unsafe{::tulip_load_plugins()};
+    }
+
+    pub fn init_tulip_software() {
+        unsafe{ ::tulip_init_tulip_software()};
+    }
 
 
     pub struct Graph {

@@ -30,6 +30,12 @@ struct color_t {
 
 };
 
+
+EXTERNC void tulip_init_lib();
+EXTERNC void tulip_load_plugins();
+EXTERNC void tulip_init_tulip_software();
+
+
 EXTERNC tulip_graph_t tulip_new_graph();
 
 EXTERNC tulip_node tulip_add_node(tulip_graph_t);

@@ -2,6 +2,9 @@ SET(tulipc_LIB_SRCS ${tulipc_LIB_SRCS}
 	tulip_graph.cpp
 )
 
+
+QTX_SET_INCLUDES_AND_DEFINITIONS()
+
 SET(LibTulipCoreNameC "c-${LibTulipCoreName}")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
@@ -9,14 +12,14 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
 IF(HAVE_REENTRANT_QHULL)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_REENTRANT_QHULL")
 ENDIF(HAVE_REENTRANT_QHULL)
-INCLUDE_DIRECTORIES(${TulipCoreBuildInclude} ${TulipCoreInclude} ${PROJECT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR} ${YajlInclude} ${QhullInclude} ${GZStreamInclude} ${UTF8CppInclude})
+INCLUDE_DIRECTORIES(${TulipCoreBuildInclude} ${TulipCoreInclude} ${TulipGUIInclude} ${PROJECT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR} ${YajlInclude} ${QhullInclude} ${GZStreamInclude} ${UTF8CppInclude}  )
 
 
 
 INCLUDE_DIRECTORIES(${TulipCoreInclude}/../../tulip-c/include )
 
 ADD_LIBRARY(${LibTulipCoreNameC} STATIC ${tulipc_LIB_SRCS})
-TARGET_LINK_LIBRARIES(${LibTulipCoreNameC} ${LibTulipCoreName} ${CMAKE_DL_LIBS})
+TARGET_LINK_LIBRARIES(${LibTulipCoreNameC} ${LibTulipCoreName} ${LibTulipGUIName} )
 IF(WIN32)
   IF(MSVC)
 	  TARGET_LINK_LIBRARIES(${LibTulipCoreNameC} Dbghelp)

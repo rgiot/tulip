@@ -2,6 +2,23 @@
 #include <tulip/Graph.h>
 
 
+
+#include <tulip/TlpTools.h>
+void tulip_init_lib() {
+	tlp::initTulipLib();
+}
+
+#include <tulip/TlpQtTools.h>
+void tulip_init_tulip_software() {
+	tlp::initTulipSoftware();
+}
+
+
+#include <tulip/PluginLibraryLoader.h>
+void tulip_load_plugins() {
+	tlp::PluginLibraryLoader::loadPlugins(nullptr);
+}
+
 tulip_graph_t tulip_new_graph() {
 	return tlp::newGraph();
 }
