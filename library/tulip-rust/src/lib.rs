@@ -64,9 +64,45 @@ pub mod tlp {
         fn set_node_value(&mut self, n: &Node, val: Self::Data);
     }
 
-    pub struct ColorProperty {
-        p: ::tulip_color_property_t
+
+    /// Generate the minimal code for the requested property
+    macro_rules! create_property {
+        (
+            $rust_type:tt,
+            $c_type:tt,
+            $rust_inner_type:ident,
+            $c_inner_type:tt,
+            $set_code:block
+        ) => (
+
+            pub struct $rust_type {
+                p: $c_type
+            }
+
+            impl Property for $rust_type {
+                type TulipType = $c_type;
+                type Data = $rust_inner_type;
+
+                fn set_node_value(&mut self, n: &Node, val: Self::Data) {
+                    $set_code
+                }
+            }
+            );
     }
+
+
+
+    create_property!(
+        ColorProperty,
+        (::tulip_color_property_t),
+        Color, (::color_t),
+        {
+            unsafe{::tulip_colorproperty_set_node_value(self.p, n.get_id(), (&val) as * const _)};
+        }
+    );
+
+
+
 
     pub struct StringProperty {
         p: ::tulip_string_property_t
@@ -77,14 +113,7 @@ pub mod tlp {
     }
 
 
-    impl Property for ColorProperty {
-        type TulipType = ::tulip_color_property_t;
-        type Data = Color;
 
-        fn set_node_value(&mut self, n: &Node, val: Self::Data) {
-            unsafe{::tulip_colorproperty_set_node_value(self.p, n.get_id(), (&val) as * const _)};
-        }
-    }
 
     impl Property for StringProperty {
         type TulipType = ::tulip_string_property_t;
