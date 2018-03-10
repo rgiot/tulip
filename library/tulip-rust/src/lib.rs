@@ -11,6 +11,30 @@ pub mod tlp {
     use std::slice;
 
 
+    /// Generate the get_property code for the specific type of data
+    macro_rules! get_property {
+        ($type:/*ty*/tt, $rustname:ident, $cname:tt/*ident*/) => (
+            pub fn $rustname(&self, name:&str) -> $type {
+                use std::os::raw::c_char;
+                use std::ffi::CString;
+
+                let prop:$type;
+                prop = $type{
+                    p: unsafe{
+                        $cname(
+                            self.g,
+                            CString::new(name).unwrap().as_ptr()
+                        )
+                    }
+                };
+                prop
+            }
+        );
+    }
+
+
+
+
     pub struct Graph {
         g: ::tulip_graph_t,
         no_nodes: [Node; 0], // manage the absence of nodes
@@ -196,27 +220,9 @@ pub mod tlp {
             unsafe{::tulip_deg(self.g, n.get_id())}
         }
 
+        get_property!(ColorProperty, get_color_property, (::tulip_get_color_property));
+        get_property!(StringProperty, get_string_property, (::tulip_get_string_property));
 
-        // TODO Use macros to generate all variants of each type
-        pub fn get_color_property(&self, name:&str) -> ColorProperty {
-            use std::os::raw::c_char;
-            use std::ffi::{CString, CStr};
-
-            ColorProperty {
-                p: unsafe{::tulip_get_color_property(self.g, CString::new(name).unwrap().as_ptr())}
-            }
-        }
-
-
-        // TODO Use macros to generate all variants of each type
-        pub fn get_string_property(&self, name:&str) -> StringProperty {
-            use std::os::raw::c_char;
-            use std::ffi::{CString, CStr};
-
-            StringProperty {
-                p: unsafe{::tulip_get_string_property(self.g, CString::new(name).unwrap().as_ptr())}
-            }
-        }
     }
 
 #[cfg(test)]
