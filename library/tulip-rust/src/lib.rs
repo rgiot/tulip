@@ -72,7 +72,7 @@ pub mod tlp {
             $c_type:tt,
             $rust_inner_type:ident,
             $c_inner_type:tt,
-            $set_code:block
+            $set_code:expr
         ) => (
 
             pub struct $rust_type {
@@ -84,7 +84,7 @@ pub mod tlp {
                 type Data = $rust_inner_type;
 
                 fn set_node_value(&mut self, n: &Node, val: Self::Data) {
-                    $set_code
+                    $set_code(self, n, val);
                 }
             }
             );
@@ -95,44 +95,34 @@ pub mod tlp {
     create_property!(
         ColorProperty,
         (::tulip_color_property_t),
-        Color, (::color_t),
-        {
-            unsafe{::tulip_colorproperty_set_node_value(self.p, n.get_id(), (&val) as * const _)};
+        Color,
+        (::color_t),
+        |prop:&mut ColorProperty, n: &Node, val:Color| {
+            unsafe{::tulip_colorproperty_set_node_value(prop.p, n.get_id(), (&val) as * const _)}
         }
     );
 
-
-
-
-    pub struct StringProperty {
-        p: ::tulip_string_property_t
-    }
-
-    pub struct DoubleProperty {
-        p: ::tulip_double_property_t
-    }
-
-
-
-
-    impl Property for StringProperty {
-        type TulipType = ::tulip_string_property_t;
-        type Data = String;
-
-        fn set_node_value(&mut self, n:&Node, val: Self::Data) {
+    create_property!(
+        StringProperty,
+        (::tulip_string_property_t),
+        String,
+        (::string_t),
+        |prop:&mut StringProperty, n: &Node, val:String| {
             use std::ffi::CString;
-            unsafe{::tulip_stringproperty_set_node_value(self.p, n.get_id(), CString::new(val).unwrap().as_ptr() )};
+            unsafe{::tulip_stringproperty_set_node_value(prop.p, n.get_id(), CString::new(val).unwrap().as_ptr() )};
         }
-    }
+    );
 
-    impl Property for DoubleProperty {
-        type TulipType = ::tulip_double_property_t;
-        type Data = f64;
-
-        fn set_node_value(&mut self, n:&Node, val: Self::Data) {
-            unsafe{::tulip_doubleproperty_set_node_value(self.p, n.get_id(), val)};
+    create_property!(
+        DoubleProperty,
+        (::tulip_double_property_t),
+        f64,
+        (::double_t),
+        |prop:&mut DoubleProperty, n: &Node, val:f64| {
+            unsafe{::tulip_doubleproperty_set_node_value(prop.p, n.get_id(), val)}
         }
-    }
+    );
+
 
 
 
