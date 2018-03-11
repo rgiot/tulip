@@ -27,8 +27,12 @@ fn main() {
 
     let TULIP_LINK_LIB = [
         format!("{}{}{}", RUSTC_LINK_LIB, "c-tulip-core-", TULIP_VERSION),
+
         format!("{}{}{}", RUSTC_LINK_LIB, "tulip-core-", TULIP_VERSION),
         format!("{}{}{}", RUSTC_LINK_LIB, "tulip-gui-", TULIP_VERSION),
+
+        format!("{}{}", RUSTC_LINK_LIB, "QtGui"),
+
         format!("{}{}", RUSTC_LINK_LIB, "stdc++")
     ];
 

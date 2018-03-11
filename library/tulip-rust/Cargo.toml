@@ -9,3 +9,7 @@ libc = "*"
 
 [build-dependencies]
 bindgen = "0.26.3"
+
+[[bin]]
+name = "graphmanipulation"
+path = "demos/graphmanipulation.rs"

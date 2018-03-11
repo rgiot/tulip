@@ -43,6 +43,8 @@ PluginLibraryLoader *PluginLibraryLoader::_instance = nullptr;
 
 #ifndef EMSCRIPTEN
 void PluginLibraryLoader::loadPlugins(PluginLoader *loader, const std::string &folder) {
+
+	printf("Search plugins in %s\n", folder.c_str());
   std::vector<std::string> paths;
   std::stringstream ss(TulipPluginsPath);
   std::string item;

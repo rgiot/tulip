@@ -11,6 +11,7 @@ pub mod tlp {
     use std::slice;
     use std::ptr;
     use std::os;
+    use std::fmt;
 
     /// Generate the get_property code for the specific type of data
     macro_rules! get_property {
@@ -39,6 +40,7 @@ pub mod tlp {
     }
 
     pub fn load_plugins() {
+        print!("Load plugins rust");
         unsafe{::tulip_load_plugins()};
     }
 
@@ -73,17 +75,21 @@ pub mod tlp {
 
         /// Change the value of the required node
         fn set_node_value(&mut self, n: &Node, val: Self::Data);
+
+        /// Retreive the value of the required node
+        fn get_node_value(&self, n: &Node) -> Self::Data;
     }
 
 
     /// Generate the minimal code for the requested property
     macro_rules! create_property {
         (
-            $rust_type:tt,
-            $c_type:tt,
-            $rust_inner_type:ident,
-            $c_inner_type:tt,
-            $set_code:expr
+            $rust_type: tt,
+            $c_type: tt,
+            $rust_inner_type: ident,
+            $c_inner_type: tt,
+            $set_code: expr,
+            $get_code: expr
         ) => (
 
             pub struct $rust_type {
@@ -97,6 +103,11 @@ pub mod tlp {
                 fn set_node_value(&mut self, n: &Node, val: Self::Data) {
                     $set_code(self, n, val);
                 }
+
+
+                fn get_node_value(&self, n: &Node) -> Self::Data {
+                    $get_code(self, n)
+                }
             }
             );
     }
@@ -108,8 +119,13 @@ pub mod tlp {
         (::tulip_color_property_t),
         Color,
         (::color_t),
+
         |prop:&mut ColorProperty, n: &Node, val:Color| {
             unsafe{::tulip_colorproperty_set_node_value(prop.p, n.get_id(), (&val) as * const _)}
+        },
+
+        |prop:& ColorProperty, n: &Node| -> Color {
+            unsafe{::tulip_colorproperty_get_node_value(prop.p, n.get_id())}
         }
     );
 
@@ -121,6 +137,19 @@ pub mod tlp {
         |prop:&mut StringProperty, n: &Node, val:String| {
             use std::ffi::CString;
             unsafe{::tulip_stringproperty_set_node_value(prop.p, n.get_id(), CString::new(val).unwrap().as_ptr() )};
+        },
+
+        |prop:& StringProperty, n: &Node| -> String {
+            use std::ffi::CStr;
+            unsafe{
+                String::from(
+                    CStr::from_ptr(
+                        ::tulip_stringproperty_get_node_value(prop.p, n.get_id())
+                    )
+                    .to_str()
+                    .unwrap()
+                )
+            }
         }
     );
 
@@ -131,6 +160,10 @@ pub mod tlp {
         (::double_t),
         |prop:&mut DoubleProperty, n: &Node, val:f64| {
             unsafe{::tulip_doubleproperty_set_node_value(prop.p, n.get_id(), val)}
+        },
+
+        |prop:& DoubleProperty, n: &Node| -> f64 {
+            unsafe{::tulip_doubleproperty_get_node_value(prop.p, n.get_id())}
         }
     );
 
@@ -152,6 +185,12 @@ pub mod tlp {
     #[derive(Clone)]
     pub struct Node {
         idx: u32
+    }
+
+    impl fmt::Display for Node {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "{}", self.idx)
+        }
     }
 
     #[derive(Clone)]
@@ -293,7 +332,7 @@ pub mod tlp {
 
 
         // Algorithm stuff
-        pub fn apply_property_algorithm(& mut self, algo_name: &str, property: DoubleProperty) -> Result<(), String>
+        pub fn apply_property_algorithm(& mut self, algo_name: &str, property: &DoubleProperty) -> Result<(), String>
         {
             use std::ffi::CString;
             let c_algo_name = CString::new(algo_name).unwrap().as_ptr();

@@ -2,11 +2,12 @@
 
 use tulip::tlp::*;
 
-#[test]
-fn test() {
+fn main() {
 
-    init_lib();
-    init_tulip_software();
+    println!("START");
+   // init_lib();
+   // init_tulip_software();
+   // load_plugins();
 
     let mut myGraph = Graph::new().expect("Unable to create the graph");
 
@@ -38,8 +39,23 @@ fn test() {
 
     let mut metric = myGraph.get_double_property("degree");
 
-    myGraph.apply_property_algorithm("Degree", metric).expect("Failure");
-    //assert!((&res).is_ok());
+     match myGraph.apply_property_algorithm("Degree", &metric) {
+        Ok(_) => {println!("Able to call degree");}
+        Err(msg) => {
+            eprintln!("Unable to call degree: {}", msg);
+
+            for n in myGraph.nodes() {
+                let deg = myGraph.deg(n) as f64;
+                metric.set_node_value(n, deg);
+                println!("{} => {} (should be 2)", n, &deg);
+            }
+
+            println!("Degree manually computed");
+        }
+     }
+
+
+     println!("A degree => {} (should be 2)", metric.get_node_value(&a));
 
     // TODO add additional instructions of the demo
 

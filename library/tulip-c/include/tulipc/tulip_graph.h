@@ -72,7 +72,7 @@ EXTERNC const struct color_t tulip_colorproperty_get_node_value(tulip_color_prop
 
 EXTERNC tulip_string_property_t tulip_get_string_property(tulip_graph_t g, const char *);
 EXTERNC void tulip_stringproperty_set_node_value(tulip_string_property_t, const tulip_node n, const char *);
-EXTERNC const char *tulip_stringproperty_get_node_value(tulip_string_property_t, const tulip_node n);
+EXTERNC const char * tulip_stringproperty_get_node_value(tulip_string_property_t, const tulip_node n);
 
 
 

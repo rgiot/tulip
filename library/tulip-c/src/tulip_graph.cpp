@@ -4,8 +4,16 @@
 
 
 #include <tulip/TlpTools.h>
+#include <QApplication>
+int argc = 0;
+char* arg1= "";
+char* argv[] = {
+	arg1
+};
+// TODO do not hardcode address
 void tulip_init_lib() {
-	tlp::initTulipLib();
+	new QApplication(argc, argv);// XXX Dirty hack to fix QPixmap: Must construct a QApplication before a QPaintDevice
+	tlp::initTulipLib("/home/rgiot/opt/tulip-rust/"); 
 }
 
 #include <tulip/TlpQtTools.h>
@@ -15,8 +23,11 @@ void tulip_init_tulip_software() {
 
 
 #include <tulip/PluginLibraryLoader.h>
+#include <tulip/PluginLoaderTxt.h>
 void tulip_load_plugins() {
-	tlp::PluginLibraryLoader::loadPlugins(nullptr);
+	printf("Load plugins C++\n");
+	tlp::PluginLoaderTxt loadertxt;
+	tlp::PluginLibraryLoader::loadPlugins(&loadertxt);
 }
 
 tulip_graph_t tulip_new_graph() {
@@ -181,19 +192,21 @@ void tulip_doubleproperty_set_node_value(tulip_double_property_t p, const tulip_
 }
 
 const double  tulip_doubleproperty_get_node_value(tulip_double_property_t p, tulip_node n) {
-	return reinterpret_cast<tlp::DoubleProperty *>(p)->getNodeValue(tlp::node(n));
+	auto val = reinterpret_cast<tlp::DoubleProperty *>(p)->getNodeValue(tlp::node(n));
+	printf("%f <= %d\n", val, n);
+	return val;
 }
 
 
-
+// XXX not reentrant
 std::string error;
 
 
-// TODO templetize for all the cases
 char tulip_apply_doubleproperty_algorithm(tulip_graph_t g, tulip_double_property_t p, const char * const n, tulip_dataset_t const d) {
+	error = "";
 	return reinterpret_cast<tlp::Graph *>(g)->applyPropertyAlgorithm(
-			n,
-			reinterpret_cast<tlp::DoubleProperty *>(p),
+			std::string("Degree"),
+			reinterpret_cast<tlp::PropertyInterface *>(p), // Expected: PropertyInterface
 			error,
 			reinterpret_cast<tlp::DataSet *>(d)
 			);
