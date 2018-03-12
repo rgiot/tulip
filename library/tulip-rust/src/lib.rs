@@ -12,6 +12,7 @@ pub mod tlp {
     use std::ptr;
     use std::os;
     use std::fmt;
+    use std::convert::AsRef;
 
     /// Generate the get_property code for the specific type of data
     macro_rules! get_property {
@@ -180,6 +181,8 @@ pub mod tlp {
             self.get_id() != <u32>::max_value()
         }
 
+
+
     }
 
     #[derive(Clone)]
@@ -221,6 +224,8 @@ pub mod tlp {
         }
     }
 
+
+
     impl GraphElement for Edge {
         fn get_id(&self) -> u32 {
             return self.idx
@@ -233,6 +238,11 @@ pub mod tlp {
 
 
     }
+
+    impl Edge {
+  
+    }
+
 
     impl Graph {
 
@@ -447,6 +457,35 @@ pub mod tlp {
             assert_eq!(g.deg(&n1), 1);
             assert_eq!(g.deg(&n3), 0);
 
+
+        }
+
+        #[test]
+        fn deg_ref() {
+            let mut g = Graph::new().expect("Unable to create graph");
+            let n1 = &g.add_node();
+            let n2 = &g.add_node();
+            let n3 = &g.add_node();
+            let e = g.add_edge(n1, n2);
+
+            let nb_nodes = g.number_of_nodes();
+            assert_eq!(nb_nodes, 3);
+            assert_eq!(g.deg(n1), 1);
+            assert_eq!(g.deg(n3), 0);
+        }
+
+        #[test]
+        fn get_double_property() {
+            let mut g = Graph::new().expect("Unable to create graph");
+            let n1 = g.add_node();
+            let n2 = g.add_node();
+            let mut metric = g.get_double_property("metric");
+
+            let val = 256f64;
+            metric.set_node_value(&n1, val);
+            metric.set_node_value(&n2, -val);
+            assert_eq!(metric.get_node_value(&n1), val);
+            assert_eq!(metric.get_node_value(&n2), -val);
 
         }
     }
