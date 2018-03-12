@@ -184,7 +184,7 @@ const char * tulip_stringproperty_get_node_value(tulip_string_property_t p, tuli
 #include <tulip/DoubleProperty.h>
 
 tulip_double_property_t tulip_get_double_property(tulip_graph_t g, const char *prop) {
-	return reinterpret_cast<tlp::Graph *>(g)->getProperty<tlp::ColorProperty>(prop);
+	return reinterpret_cast<tlp::Graph *>(g)->getProperty<tlp::DoubleProperty>(prop);
 }
 
 void tulip_doubleproperty_set_node_value(tulip_double_property_t p, const tulip_node n, const double val) {
@@ -192,9 +192,7 @@ void tulip_doubleproperty_set_node_value(tulip_double_property_t p, const tulip_
 }
 
 const double  tulip_doubleproperty_get_node_value(tulip_double_property_t p, tulip_node n) {
-	auto val = reinterpret_cast<tlp::DoubleProperty *>(p)->getNodeValue(tlp::node(n));
-	printf("%f <= %d\n", val, n);
-	return val;
+	return reinterpret_cast<tlp::DoubleProperty *>(p)->getNodeValue(tlp::node(n));
 }
 
 
@@ -205,7 +203,7 @@ std::string error;
 char tulip_apply_doubleproperty_algorithm(tulip_graph_t g, tulip_double_property_t p, const char * const n, tulip_dataset_t const d) {
 	error = "";
 	return reinterpret_cast<tlp::Graph *>(g)->applyPropertyAlgorithm(
-			std::string("Degree"),
+			std::string(n),
 			reinterpret_cast<tlp::PropertyInterface *>(p), // Expected: PropertyInterface
 			error,
 			reinterpret_cast<tlp::DataSet *>(d)
